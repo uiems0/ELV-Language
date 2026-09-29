@@ -2,29 +2,74 @@
 
 char InputText[] = "Temp";
 
-const char *Keywords[13] = {
-    "Func",
-    "For",
-    "While",
-    "If",
-    "Do",`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
-    "Then",
-    "End",
-    "~",
-    "|~",
-    "~|",
-    "Elseif",
-    "Log",
-    "Arr"
-};
+
 
 const char *CreatedVars[0] = {};
 
 int InputedTextLength = sizeof(InputText) - 2;
-char Setting[] = "Cont";
+char Setting[] = "Cont";//Cont means Continue
 char CurString[] = "";
 
+int ReturnError(char *ErrorMessage) {
+    printf("Error: %s\n", ErrorMessage);
+    return 0;
+}
 
-for (int i = 0; i <= length ; i++ ) {
+for (int i = 0; i <= InputedTextLength ; i++ ) {
     CurString = strcat(CurString,InputText[i]);
+    
+    if (strcamp(Setting, "MultilineCommenting") == 0) {
+        if (CurString == "~|") {
+            Setting = "Cont";
+            CurString = "";
+            continue;
+        }
+    }
+
+    switch (CurString) {
+
+        case "/t":
+         if (strcamp(Setting, "Commenting") == 0) {// If the setting is "Commenting", we ignore untill the tab character
+            Setting = "Cont";
+        }
+        break;
+        case "Func":
+            printf("Keyword: Func\n");
+            break;
+        case "For":
+            printf("Keyword: For\n");
+            break;
+        case "While":
+            printf("Keyword: While\n");
+            break;
+        case "If":
+            printf("Keyword: If\n");
+            break;
+        case "Do":
+            printf("Keyword: Do\n");
+            break;
+        case "Then":
+            printf("Keyword: Then\n");
+            break;
+        case "End":
+            printf("Keyword: End\n");
+            break;
+            case  "~":
+            printf("Keyword: ~\n");
+            Setting = "Commenting";
+            break;
+        case "|~":
+            printf("Keyword: |~\n");
+            Setting = "MultilineCommenting";
+            break;
+        case "Elseif":
+            printf("Keyword: Elseif\n");
+            break;
+        case "Log":
+            printf("Keyword: Log\n");
+            break;
+        case "Arr":
+            printf("Keyword: Arr\n");
+            break;
+    }
 };
