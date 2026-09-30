@@ -2,7 +2,12 @@
 
 char InputText[] = "Temp";
 
-
+#define get_type(type) _Generic((type), \
+    int: "int", \
+    float: "float", \
+    double: "double", \
+    char *: "string", \
+    default: "unknown")
 
 const char *CreatedVars[0] = {};
 
@@ -18,8 +23,20 @@ int ReturnError(char *ErrorMessage) {
 for (int i = 0; i <= InputedTextLength ; i++ ) {
     CurString = strcat(CurString,InputText[i]);
     
+    if (strcamp(Setting, "Log") == 0) {
+        if (strstr(CurString,")") != NULL) {
+
+            //I need to implement the ability to make vars
+
+
+            Setting = "Cont";
+            CurString = "";
+            continue;
+        }
+    }
+
     if (strcamp(Setting, "MultilineCommenting") == 0) {
-        if (CurString == "~|") {
+        if (strstr(CurString,"~|") != NULL) {
             Setting = "Cont";
             CurString = "";
             continue;
@@ -66,7 +83,9 @@ for (int i = 0; i <= InputedTextLength ; i++ ) {
             printf("Keyword: Elseif\n");
             break;
         case "Log":
-            printf("Keyword: Log\n");
+            printf("Keyword: Log(\n");
+            Setting = "Log";
+            CurString = "";
             break;
         case "Arr":
             printf("Keyword: Arr\n");
