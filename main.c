@@ -1,4 +1,15 @@
 #include <stdio.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef enum {
+    V_Null,
+    V_Int,
+    V_Double,
+    V_String,
+    V_Dict,
+} ValueType;
 
 char InputText[] = "Temp";
 
@@ -9,7 +20,7 @@ char InputText[] = "Temp";
     char *: "string", \
     default: "unknown")
 
-const char *CreatedVars[0] = {};
+char *CreatedVars[0] = {};
 
 int InputedTextLength = sizeof(InputText) - 2;
 char Setting[] = "Cont";//Cont means Continue
