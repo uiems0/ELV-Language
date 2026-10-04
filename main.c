@@ -12,7 +12,7 @@ typedef struct {
 } Map;
 
 void InitMap(Map *map, size_t entrySize, size_t keySize, bool (*compare)(const void *, const void *)) {
-    map->Entries = 0;
+    free(map->Entries);
     map->Count = 0;
     map->Capacity = 0;
     map->EntrySize = NULL;
@@ -21,6 +21,51 @@ void InitMap(Map *map, size_t entrySize, size_t keySize, bool (*compare)(const v
 }
 
 
+static inline uint32_t HashFunction(void *key, size_t keySize) {
+    uint8_t *bytes = (uint8_t *)key;
+    uint32_t hash = 2166136261u;
+
+    for (size_t i = 0; i < keySize; i++) {
+        hash ^= bytes[i];
+        hash *= 16777619;
+    }
+    return hash;
+}
+
+
+static inline bool isNull(uint8_t *bytes, size_t size) {
+  for (size_t i = 0; i < size; i++) {
+    if (bytes[i] != 0) return false;
+  }
+  return true;
+}
+
+static uint8_t *linearProbing(Map *map, void *entries, void *key,
+                              size_t entrySize, size_t capacity) {
+  uint32_t hash = hashFunction(key, map->key_size);
+  uint32_t index = hash % capacity;
+  uint8_t *tombstone = NULL;
+
+  for (;;) {
+    uint8_t *entry = entries + (index * entrySize);
+    void *value = entry + map->key_size;
+
+    if (isNull(entry, map->key_size)) {
+      if (isNull(value, map->value_size)) {
+        return tombstone != NULL ? tombstone : entry;
+      } else {
+        if (tombstone == NULL) {
+          tombstone = entry;
+        }
+      }
+    } else if (map->cmp(entry, key)) {
+      return entry;
+    }
+
+    // Wraps back to 0 when end hit
+    index = (index + 1) % map->capacity;
+  }
+}
 
 
 char InputText[] = "Temp";
