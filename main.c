@@ -67,6 +67,38 @@ static uint8_t *linearProbing(Map *map, void *entries, void *key,
   }
 }
 
+#define MAX_LOAD 0.75
+
+static void adjustArray(Map *map) {
+  int newCapacity = grow_capacity(map->capacity);
+  size_t entrySize = map->key_size + map->value_size;
+
+  uint8_t *oldEntries = (uint8_t *)map->entries;
+  uint8_t *newEntries = malloc(newCapacity * entrySize);
+
+  // Zero out new buffer
+  memset(newEntries, 0, newCapacity * entrySize);
+  map->count = 0;
+
+  // Iterate over existing entries
+  for (int i = 0; i < map->capacity; i++) {
+    uint8_t *oldEntry = oldEntries + (i * entrySize);
+    void *key = oldEntry;
+    void *value = oldEntry + map->key_size;
+
+    if (isNull(key, map->key_size)) continue;
+
+    uint8_t *dest = linearProbing(map, newEntries, key, entrySize, newCapacity);
+
+    memcpy(dest, key, map->key_size);
+    memcpy(dest + map->key_size, value, map->value_size);
+    map->count++;
+  }
+
+  free(map->entries);
+  map->entries = newEntries;
+  map->capacity = newCapacity;
+}
 
 char InputText[] = "Temp";
 
