@@ -22,3 +22,5 @@ Wanted Features = {
     // for sqrt
     Maybe more if i can think of them
 }
+
+Im going to try to allow the hash table to have a hash table inside of it, and a hash table inside of that and so on for things like vars inside of functions and tables
