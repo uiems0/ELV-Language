@@ -100,6 +100,21 @@ static void adjustArray(Map *map) {
   map->capacity = newCapacity;
 }
 
+
+void mapRemove(Map *map, void *key) {
+  if (map->count == 0) return;
+
+  // Get destination in new array
+  uint8_t *entry = linearProbing(
+      map, map->entries, key, (map->key_size + map->value_size), map->capacity);
+
+  memset(entry, 0, map->key_size);
+
+  // TOMBSTONE IS 1
+  memset(entry + map->key_size, 0, map->value_size);
+  memset(entry + map->key_size + map->value_size - 1, 1, 1);
+}
+
 char InputText[] = "Temp";
 
 #define get_type(type) _Generic((type), \
