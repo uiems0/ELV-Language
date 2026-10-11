@@ -115,6 +115,22 @@ void mapRemove(Map *map, void *key) {
   memset(entry + map->key_size + map->value_size - 1, 1, 1);
 }
 
+
+void *mapGet(Map *map, void *key) {
+  if (map->capacity == 0) return NULL;
+
+  // Get destination in new array
+  uint8_t *entry = linearProbing(
+      map, map->entries, key, (map->key_size + map->value_size), map->capacity);
+  if (isNull(entry, map->key_size)) return NULL;
+  return entry + map->key_size;
+}
+
+void mapClear(Map *map) {
+  size_t entrySize = map->key_size + map->value_size;
+  memset(map->entries, 0, map->capacity * entrySize);
+  map->count = 0;
+}
 char InputText[] = "Temp";
 
 #define get_type(type) _Generic((type), \
