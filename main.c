@@ -131,6 +131,14 @@ void mapClear(Map *map) {
   memset(map->entries, 0, map->capacity * entrySize);
   map->count = 0;
 }
+
+bool str_cmp(const void* a, const void* b) {
+  const char* sa = (const char*)a;
+  const char* sb = (const char*)b;
+  return strcmp(sa, sb) == 0;
+}
+
+
 char InputText[] = "Temp";
 
 #define get_type(type) _Generic((type), \
