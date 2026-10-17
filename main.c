@@ -131,15 +131,19 @@ void mapClear(Map *map) {
   memset(map->entries, 0, map->capacity * entrySize);
   map->count = 0;
 }
+char InputText[] = "Temp";
 
-bool str_cmp(const void* a, const void* b) {
+bool Ent(const void* a, const void* b) {
   const char* sa = (const char*)a;
   const char* sb = (const char*)b;
   return strcmp(sa, sb) == 0;
 }
 
 
-char InputText[] = "Temp";
+Map &map;
+initMap(&map, 10, sizeof(int), Ent);
+
+
 
 #define get_type(type) _Generic((type), \
     int: "int", \
@@ -204,6 +208,12 @@ for (int i = 0; i <= InputedTextLength ; i++ ) {
         case "TypeVarVal":
             if (strstr(CurString," ") != NULL) {
             Setting = "ValVar";
+            CurString = "";
+        }
+        case "ValVar":
+            if (strstr(CurString,"\t") != NULL) {
+            mapPut()
+            Setting = "Cont";
             CurString = "";
         }
 
