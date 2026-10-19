@@ -1,6 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
+
+void ReturnError(char *ErrorMessage) {
+    printf("Error: %s\n", ErrorMessage);
+    return;
+}
 
 typedef struct {
     void *Entries;
@@ -115,6 +121,24 @@ void mapRemove(Map *map, void *key) {
   memset(entry + map->key_size + map->value_size - 1, 1, 1);
 }
 
+bool mapPut(Map *map, void *key, void *value) {
+  if (map->count >= map->capacity * MAX_LOAD) {
+    adjustArray(map);
+  }
+
+  uint8_t *entry = linearProbing(
+      map, map->entries, key, (map->key_size + map->value_size), map->capacity);
+
+  bool isNewKey = isNull(entry, map->key_size);
+  if (isNewKey && isNull(entry + map->key_size, map->value_size)) {
+    map->count++;
+  }
+
+  memcpy(entry, key, map->key_size);
+  memcpy(entry + map->key_size, value, map->value_size);
+
+  return isNewKey;
+}
 
 void *mapGet(Map *map, void *key) {
   if (map->capacity == 0) return NULL;
@@ -141,7 +165,7 @@ bool Ent(const void* a, const void* b) {
 
 
 Map &map;
-initMap(&map, 10, sizeof(int), Ent);
+initMap(&map, 32, 32, Ent);
 
 
 
@@ -158,10 +182,7 @@ int InputedTextLength = sizeof(InputText) - 2;
 char Setting[] = "Cont";//Cont means Continue
 char CurString[] = "";
 
-void ReturnError(char *ErrorMessage) {
-    printf("Error: %s\n", ErrorMessage);
-    return;
-}
+
 
 char CurrentlyCreatingVar[] = "";
 
@@ -212,7 +233,27 @@ for (int i = 0; i <= InputedTextLength ; i++ ) {
         }
         case "ValVar":
             if (strstr(CurString,"\t") != NULL) {
-            mapPut()
+            
+            char CheckingString[] = InputText[i] - strlen(CurString);
+
+            if (strstr(CheckingString, "\"") != NULL) {
+                mapPut(&map, CurrentlyCreatingVar, CurString);
+            } else {
+             if (strstr(CheckingString, "true") != NULL) {
+                mapPut(&map, CurrentlyCreatingVar, true);
+             } else if (strstr(CheckingString, "false") != NULL) {
+                mapPut(&map, CurrentlyCreatingVar, false);
+             } else {
+                char *endptr;
+                strstrod(CurString, &endptr);
+                if (errno != ERANGE) {
+                    mapPut(&map, CurrentlyCreatingVar, CheckingString - '0');
+                 } else {
+                    returnError("Invalid value for variable");
+                 }
+             }
+            }
+            
             Setting = "Cont";
             CurString = "";
         }
