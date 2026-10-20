@@ -48,112 +48,116 @@ static inline bool isNull(uint8_t *bytes, size_t size) {
 
 static uint8_t *linearProbing(Map *map, void *entries, void *key,
                               size_t entrySize, size_t capacity) {
-  uint32_t hash = hashFunction(key, map->key_size);
+  uint32_t hash = HashFunction(key, map->KeySize);
   uint32_t index = hash % capacity;
   uint8_t *tombstone = NULL;
 
   for (;;) {
     uint8_t *entry = entries + (index * entrySize);
-    void *value = entry + map->key_size;
+    void *value = entry + map->KeySize;
 
-    if (isNull(entry, map->key_size)) {
-      if (isNull(value, map->value_size)) {
+    if (isNull(entry, map->KeySize)) {
+      if (isNull(value, map->ValueSize)) {
         return tombstone != NULL ? tombstone : entry;
       } else {
         if (tombstone == NULL) {
           tombstone = entry;
         }
       }
-    } else if (map->cmp(entry, key)) {
+    } else if (map->Compare(entry, key)) {
       return entry;
     }
 
     // Wraps back to 0 when end hit
-    index = (index + 1) % map->capacity;
+    index = (index + 1) % map->Capacity;
   }
 }
 
 #define MAX_LOAD 0.75
 
 static void adjustArray(Map *map) {
-  int newCapacity = grow_capacity(map->capacity);
-  size_t entrySize = map->key_size + map->value_size;
+  int newCapacity = grow_capacity(map->Capacity);
+  size_t entrySize = map->KeySize + map->ValueSize;
 
-  uint8_t *oldEntries = (uint8_t *)map->entries;
+  uint8_t *oldEntries = (uint8_t *)map->Entries;
   uint8_t *newEntries = malloc(newCapacity * entrySize);
+
+  if (newEntries == NULL) {
+    ReturnError("Failed to allocate memory for map resizing");
+  }
 
   // Zero out new buffer
   memset(newEntries, 0, newCapacity * entrySize);
-  map->count = 0;
+  map->Count = 0;
 
   // Iterate over existing entries
-  for (int i = 0; i < map->capacity; i++) {
+  for (int i = 0; i < map->Capacity; i++) {
     uint8_t *oldEntry = oldEntries + (i * entrySize);
     void *key = oldEntry;
-    void *value = oldEntry + map->key_size;
+    void *value = oldEntry + map->KeySize;
 
-    if (isNull(key, map->key_size)) continue;
+    if (isNull(key, map->KeySize)) continue;
 
     uint8_t *dest = linearProbing(map, newEntries, key, entrySize, newCapacity);
 
-    memcpy(dest, key, map->key_size);
-    memcpy(dest + map->key_size, value, map->value_size);
-    map->count++;
+    memcpy(dest, key, map->KeySize);
+    memcpy(dest + map->KeySize, value, map->ValueSize);
+    map->Count++;
   }
 
-  free(map->entries);
-  map->entries = newEntries;
-  map->capacity = newCapacity;
+  free(map->Entries);
+  map->Entries = newEntries;
+  map->Capacity = newCapacity;
 }
 
 
 void mapRemove(Map *map, void *key) {
-  if (map->count == 0) return;
+  if (map->Count == 0) return;
 
   // Get destination in new array
   uint8_t *entry = linearProbing(
-      map, map->entries, key, (map->key_size + map->value_size), map->capacity);
+      map, map->Entries, key, (map->KeySize + map->ValueSize), map->Capacity);
 
-  memset(entry, 0, map->key_size);
+  memset(entry, 0, map->KeySize);
 
   // TOMBSTONE IS 1
-  memset(entry + map->key_size, 0, map->value_size);
-  memset(entry + map->key_size + map->value_size - 1, 1, 1);
+  memset(entry + map->KeySize, 0, map->ValueSize);
+  memset(entry + map->KeySize + map->ValueSize - 1, 1, 1);
 }
 
 bool mapPut(Map *map, void *key, void *value) {
-  if (map->count >= map->capacity * MAX_LOAD) {
+  if (map->Count >= map->Capacity * MAX_LOAD) {
     adjustArray(map);
   }
 
   uint8_t *entry = linearProbing(
-      map, map->entries, key, (map->key_size + map->value_size), map->capacity);
+      map, map->Entries, key, (map->KeySize + map->ValueSize), map->Capacity);
 
-  bool isNewKey = isNull(entry, map->key_size);
-  if (isNewKey && isNull(entry + map->key_size, map->value_size)) {
-    map->count++;
+  bool isNewKey = isNull(entry, map->KeySize);
+  if (isNewKey && isNull(entry + map->KeySize, map->ValueSize)) {
+    map->Count++;
   }
 
-  memcpy(entry, key, map->key_size);
-  memcpy(entry + map->key_size, value, map->value_size);
+  memcpy(entry, key, map->KeySize);
+  memcpy(entry + map->KeySize, value, map->ValueSize);
 
   return isNewKey;
 }
 
 void *mapGet(Map *map, void *key) {
-  if (map->capacity == 0) return NULL;
+  if (map->Capacity == 0) return NULL;
 
   // Get destination in new array
   uint8_t *entry = linearProbing(
-      map, map->entries, key, (map->key_size + map->value_size), map->capacity);
-  if (isNull(entry, map->key_size)) return NULL;
-  return entry + map->key_size;
+      map, map->Entries, key, (map->KeySize + map->ValueSize), map->Capacity);
+  if (isNull(entry, map->KeySize)) return NULL;
+  return entry + map->KeySize;
 }
 
 void mapClear(Map *map) {
-  size_t entrySize = map->key_size + map->value_size;
-  memset(map->entries, 0, map->capacity * entrySize);
-  map->count = 0;
+  size_t entrySize = map->KeySize + map->ValueSize;
+  memset(map->Entries, 0, map->Capacity * entrySize);
+  map->Count = 0;
 }
 char InputText[] = "Temp";
 
@@ -237,6 +241,16 @@ for (int i = 0; i <= InputedTextLength ; i++ ) {
             char CheckingString[] = InputText[i] - strlen(CurString);
 
             if (strstr(CheckingString, "\"") != NULL) {
+                int RemoveQuotes = 0;
+                for (int j = 0; j < strlen(CurString); j++) {
+                    if (CurString[j] == '\"') {
+                        CurString[j] = '\0';
+                        RemoveQuotes++;
+                    }
+                }
+                if (RemoveQuotes != 2) {
+                    returnError("Invalid string value");
+                }
                 mapPut(&map, CurrentlyCreatingVar, CurString);
             } else {
              if (strstr(CheckingString, "true") != NULL) {
