@@ -3,8 +3,10 @@
 #include <string.h>
 #include <errno.h>
 
+int ErrorLine=0; // Keeps track of the line the error occured on for debugging purposes
+
 void ReturnError(char *ErrorMessage) {
-    printf("Error: %s\n", ErrorMessage);
+    printf("Error on line %d: %s\n", ErrorLine, ErrorMessage);
     return;
 }
 
@@ -211,12 +213,35 @@ for (int i = 0; i <= InputedTextLength ; i++ ) {
 
         break;
             case "Log":
-            if (strstr(CurString,")") != NULL) {
-            //I need to implement the ability to make vars
-            Setting = "Cont";
+            if (strstr(CurString,"(") != NULL) {
+            Setting = "StartLogging";
             CurString = "";
         }
         break;
+        case "StartLogging":
+            if (strstr(CurString,")") != NULL && strstr(CurString,"\t") != NULL) {
+
+                char MinSetting[] = "nil";
+                char ToPrint[] = "";
+                for (int j = 0; j < strlen(CurString); j++) {
+                    if (CurString[j] == '(' || CurString[j] == ')') {
+                        CurString[j] = '\0';
+                    }
+                    if (MinSetting == "nil") {
+                        if (CurString[j] == '\"') {
+                            MinSetting = CurString[j];
+                        }
+                    }
+                    if (MinSetting == '\"') {
+                        if (CurString[j] == '\"') {
+                        MinSetting = "nil";
+                        ToPrint = strcat(ToPrint,CurString[j]);//Unfinished, needs to add variable reading and a way to differentiate between values like log("J",Var)
+                    }
+                }
+                printf("%s", ToPrint);
+            Setting = "Cont";
+            CurString = "";
+        }
         case "SpaceVar":
             if (strstr(CurString," ") != NULL) {
             Setting = "NameVar";
@@ -277,6 +302,7 @@ for (int i = 0; i <= InputedTextLength ; i++ ) {
     switch (CurString) {
 
         case "/t":
+        ErrorLine++;
          if (strcamp(Setting, "Commenting") == 0) {// If the setting is "Commenting", we ignore untill the tab character
             Setting = "Cont";
         }
