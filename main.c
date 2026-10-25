@@ -1,12 +1,14 @@
+//I may need to remake how this language works as im not sure on how ill make it run functions and local + global vars. Will most likely make it read the code first, and then retroactivally run activate things, so that global vars can exist
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 
-int ErrorLine=0; // Keeps track of the line the error occured on for debugging purposes
+int CurLine=0; // Keeps track of the line, 
 
 void ReturnError(char *ErrorMessage) {
-    printf("Error on line %d: %s\n", ErrorLine, ErrorMessage);
+    printf("Error on line %d: %s\n", CurLine, ErrorMessage);
     return;
 }
 
@@ -181,6 +183,7 @@ initMap(&map, 32, 32, Ent);
     double: "double", \
     char *: "string", \
     default: "unknown")
+\
 
 char *CreatedVars[0] = {};
 
@@ -192,8 +195,41 @@ char CurString[] = "";
 
 char CurrentlyCreatingVar[] = "";
 
+void CreateVar (char VarName[], map *map, bool Global, char CurString[], int CurStringNum) {
+        if (strstr(VarName, "\"") != NULL) {
+            int RemoveQuotes = 0;
+            for (int j = 0; j < strlen(VarName); j++) {
+                if (CurString[CurStringNum] == '\"') {
+                    CurString[CurStringNum] = '\0';
+                    RemoveQuotes++;
+                }
+            }
+            if (RemoveQuotes != 2) {
+                returnError("Invalid string value");
+             }
+             mapPut(&map, CurrentlyCreatingVar, VarName);
+            } else {
+            if (strstr(VarName, "true") != NULL) {
+               mapPut(&map, CurrentlyCreatingVar, true);
+            } else if (strstr(VarName, "false") != NULL) {
+             mapPut(&map, CurrentlyCreatingVar, false);
+            } else {
+            char *endptr;
+            strtol(VarName, &endptr, 10);
+            if (errno != ERANGE) {
+                  mapPut(&map, CurrentlyCreatingVar, strtol(VarName, &endptr, 10));
+            } else {
+                 returnError("Invalid value for variable");
+            }
+        }
+    }
+}
+
+bool IsInFuncion = false;
 
 for (int i = 0; i <= InputedTextLength ; i++ ) {
+    if (IsInFuncion == true) {
+    } else {
     CurString = strcat(CurString,InputText[i]);
     
     switch(Setting) {
@@ -260,49 +296,55 @@ for (int i = 0; i <= InputedTextLength ; i++ ) {
             Setting = "ValVar";
             CurString = "";
         }
+        break;
         case "ValVar":
             if (strstr(CurString,"\t") != NULL) {
             
             char CheckingString[] = InputText[i] - strlen(CurString);
 
-            if (strstr(CheckingString, "\"") != NULL) {
-                int RemoveQuotes = 0;
-                for (int j = 0; j < strlen(CurString); j++) {
-                    if (CurString[j] == '\"') {
-                        CurString[j] = '\0';
-                        RemoveQuotes++;
-                    }
-                }
-                if (RemoveQuotes != 2) {
-                    returnError("Invalid string value");
-                }
-                mapPut(&map, CurrentlyCreatingVar, CurString);
-            } else {
-             if (strstr(CheckingString, "true") != NULL) {
-                mapPut(&map, CurrentlyCreatingVar, true);
-             } else if (strstr(CheckingString, "false") != NULL) {
-                mapPut(&map, CurrentlyCreatingVar, false);
-             } else {
-                char *endptr;
-                strstrod(CurString, &endptr);
-                if (errno != ERANGE) {
-                    mapPut(&map, CurrentlyCreatingVar, CheckingString - '0');
-                 } else {
-                    returnError("Invalid value for variable");
-                 }
-             }
-            }
+            CreateVar(CurString, &map, false, CurString, i);
             
             Setting = "Cont";
             CurString = "";
         }
+        break;
+        case "GSpaceVar":
+            if (strstr(CurString," ") != NULL) {
+            Setting = "GNameVar";
+            CurString = "";
+        }
+        break;
+        case "GNameVar":
+            if (strstr(CurString," ") != NULL) {
+            Setting = "GTypeVarVal";
+            CurrentlyCreatingVar = CurString;
+            CurString = "";
+        }
+        break;
+        case "GTypeVarVal":
+            if (strstr(CurString," ") != NULL) {
+            Setting = "GValVar";
+            CurString = "";
+        }
+        break;
+        case "GValVar":
+            if (strstr(CurString,"\t") != NULL) {
+            
+            char CheckingString[] = InputText[i] - strlen(CurString);
+
+            CreateVar(CurString, &map, true, CurString, i);
+            
+            Setting = "Cont";
+            CurString = "";
+        }
+        break;
 
     }
 
     switch (CurString) {
 
         case "/t":
-        ErrorLine++;
+        CurLine++;
          if (strcamp(Setting, "Commenting") == 0) {// If the setting is "Commenting", we ignore untill the tab character
             Setting = "Cont";
         }
@@ -310,11 +352,15 @@ for (int i = 0; i <= InputedTextLength ; i++ ) {
         case "Func":
             printf("Keyword: Func\n");
             break;
-            case "Var":
+        case "Var":
             printf("Keyword: Var\n");
 
             Setting = "SpaceVar";
 
+            break;
+        case "GlobalVar":
+            printf("Keyword: GlobalVar\n");
+            Setting = "GSpaceVar";
             break;
         case "For":
             printf("Keyword: For\n");
@@ -350,8 +396,5 @@ for (int i = 0; i <= InputedTextLength ; i++ ) {
             Setting = "Log";
             CurString = "";
             break;
-        case "Arr":
-            printf("Keyword: Arr\n");
-            break;
     }
-};
+}};
