@@ -192,10 +192,10 @@ char Setting[] = "Cont";//Cont means Continue
 char CurString[] = "";
 
 
+char GlobalVarsInLimbo[][] = {};#For global vars, as they are created before the function is called, so they need to be stored somewhere until the function is called
 
-char CurrentlyCreatingVar[] = "";
 
-void CreateVar (char VarName[], map *map, bool Global, char CurString[], int CurStringNum) {
+for (int i = 0; i <= InputedTextLength ; i++ ) 
         if (strstr(VarName, "\"") != NULL) {
             int RemoveQuotes = 0;
             for (int j = 0; j < strlen(VarName); j++) {
