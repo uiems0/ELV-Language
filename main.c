@@ -12,6 +12,35 @@ void ReturnError(char *ErrorMessage) {
     return;
 }
 
+
+
+int DoMath(int BaseVal, char ValuedString[]) {
+    strlen(ValuedString);
+    int LowestLayerParenthesis = 0;
+    int OpenParenthesis = 0;
+    int CloseParenthesis = 0;
+    
+    for (int i=0; i < strlen(ValuedString); i++) {#Check for parenthesis
+        switch (ValuedString[i]) {
+            case '(':
+                OpenParenthesis++;
+                break; 
+            case ')':
+                CloseParenthesis++;
+            break;
+        }
+    }
+    if (OpenParenthesis != CloseParenthesis) {
+        ReturnError("Mismatched parenthesis in math expression");
+    }
+    for (int i=0)
+    return BaseVal;
+}
+
+
+
+
+
 typedef struct {
     void *Entries;
     int Count;
@@ -192,10 +221,10 @@ char Setting[] = "Cont";//Cont means Continue
 char CurString[] = "";
 
 
-char GlobalVarsInLimbo[][] = {};#For global vars, as they are created before the function is called, so they need to be stored somewhere until the function is called
 
+char CurrentlyCreatingVar[] = "";
 
-for (int i = 0; i <= InputedTextLength ; i++ ) 
+void CreateVar (char VarName[], map *map, bool Global, char CurString[], int CurStringNum) {
         if (strstr(VarName, "\"") != NULL) {
             int RemoveQuotes = 0;
             for (int j = 0; j < strlen(VarName); j++) {
@@ -227,7 +256,11 @@ for (int i = 0; i <= InputedTextLength ; i++ )
 
 bool IsInFuncion = false;
 
-for (int i = 0; i <= InputedTextLength ; i++ ) {
+char NilUnasignedVars[][] = {};#For vars that are nil or unasigned
+
+
+
+for (int i = 0; i <= InputedTextLength ; i++ ) 
     if (IsInFuncion == true) {
     } else {
     CurString = strcat(CurString,InputText[i]);
