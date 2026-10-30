@@ -12,7 +12,46 @@ void ReturnError(char *ErrorMessage) {
     return;
 }
 
+static inline int CalcExpression(int Num1,int Num2, char Operator) {
+    switch (Operator) {
+        case '+':
+            return Num1 + Num2;
+            break;
+        case '-':
+            return Num1 - Num2;
+            break;
+        case '*':
+            return Num1 * Num2;
+            break;
+        case '/':
+            if (Num2 == 0) {
+                ReturnError("Division by zero");
+            }
+            return Num1 / Num2;
+             break;
+        case '^':
+            return pow(Num1, Num2);
+        case '_':
+        return  pow(Num1, 1.0 / Num2);#Im lazy so '_' is for sqrt
+        break;
+        default:
+            ReturnError("Invalid operator");
+            return 0; // Return a dummy value for now
+    }
+}
 
+int CalcEquation(char ValuedString[]) {
+    int NewVal;
+    for (int i = 0; i < strlen(ValuedString); i++) {#Exponents
+        switch (ValuedString[i]) {
+            case '^':
+            NewVal = CalcExpression(ValuedString[i-1] - '0', ValuedString[i+1] - '0', '^');
+
+            break;
+        }
+    }
+    return 0; // Return a dummy value for now
+}
 
 int DoMath(int BaseVal, char ValuedString[]) {
     strlen(ValuedString);
