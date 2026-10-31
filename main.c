@@ -12,7 +12,7 @@ void ReturnError(char *ErrorMessage) {
     return;
 }
 
-static inline int CalcExpression(int Num1,int Num2, char Operator) {
+inline int CalcExpression(int Num1,int Num2, char Operator) {
     switch (Operator) {
         case '+':
             return Num1 + Num2;
@@ -32,7 +32,10 @@ static inline int CalcExpression(int Num1,int Num2, char Operator) {
         case '^':
             return pow(Num1, Num2);
         case '_':
-        return  pow(Num1, 1.0 / Num2);#Im lazy so '_' is for sqrt
+        return  pow(Num2, 1.0 / Num1);//Im lazy so '_' is for sqrt
+        break; 
+        case '%':
+        return Num1 % Num2;
         break;
         default:
             ReturnError("Invalid operator");
@@ -42,7 +45,7 @@ static inline int CalcExpression(int Num1,int Num2, char Operator) {
 
 int CalcEquation(char ValuedString[]) {
     int NewVal;
-    for (int i = 0; i < strlen(ValuedString); i++) {#Exponents
+    for (int i = 0; i < strlen(ValuedString); i++) {//Exponents
         switch (ValuedString[i]) {
             case '^':
             NewVal = CalcExpression(ValuedString[i-1] - '0', ValuedString[i+1] - '0', '^');
@@ -59,7 +62,7 @@ int DoMath(int BaseVal, char ValuedString[]) {
     int OpenParenthesis = 0;
     int CloseParenthesis = 0;
     
-    for (int i=0; i < strlen(ValuedString); i++) {#Check for parenthesis
+    for (int i=0; i < strlen(ValuedString); i++) {//Check for parenthesis
         switch (ValuedString[i]) {
             case '(':
                 OpenParenthesis++;
