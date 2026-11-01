@@ -12,7 +12,7 @@ void ReturnError(char *ErrorMessage) {
     return;
 }
 
-inline int CalcExpression(int Num1,int Num2, char Operator) {
+inline int CalcExpression(int Num1,int Num2, char Operator) {//Last layer of math funcs, it is for solving small expressions like 2+2 or 3*4, etc
     switch (Operator) {
         case '+':
             return Num1 + Num2;
@@ -32,52 +32,38 @@ inline int CalcExpression(int Num1,int Num2, char Operator) {
         case '^':
             return pow(Num1, Num2);
         case '_':
-        return  pow(Num2, 1.0 / Num1);//Im lazy so '_' is for sqrt
+        if (Num1 == 0) {
+            ReturnError("Cannot take the root of zero");
+        }
+        return  pow(Num2, 1 / Num1);//Im lazy so '_' is for sqrt
         break; 
         case '%':
         return Num1 % Num2;
         break;
         default:
             ReturnError("Invalid operator");
-            return 0; // Return a dummy value for now
     }
 }
 
-int CalcEquation(char ValuedString[]) {
-    int NewVal;
-    for (int i = 0; i < strlen(ValuedString); i++) {//Exponents
-        switch (ValuedString[i]) {
-            case '^':
-            NewVal = CalcExpression(ValuedString[i-1] - '0', ValuedString[i+1] - '0', '^');
+char Numbers[10] = {'0','1','2','3','4','5','6','7','8','9'}; 
 
-            break;
+int CalcEquation(char ValuedString[]) {//Second layer of math funcs, it is for getting the values and operators from a string and then sending them to the CalcExpression function
+    float NewVal;
+    bool Finished = false;
+    int StringLength = strlen(ValuedString);
+
+    while (Finished == false) {
+        if (Finished == true) {
+            return NewVal;
+        }
+        
+        for (int i = 0; i < StringLength; i++) {
+            if () 
         }
     }
-    return 0; // Return a dummy value for now
+    printf("Equation: %s\n", ValuedString);
 }
 
-int DoMath(int BaseVal, char ValuedString[]) {
-    strlen(ValuedString);
-    int LowestLayerParenthesis = 0;
-    int OpenParenthesis = 0;
-    int CloseParenthesis = 0;
-    
-    for (int i=0; i < strlen(ValuedString); i++) {//Check for parenthesis
-        switch (ValuedString[i]) {
-            case '(':
-                OpenParenthesis++;
-                break; 
-            case ')':
-                CloseParenthesis++;
-            break;
-        }
-    }
-    if (OpenParenthesis != CloseParenthesis) {
-        ReturnError("Mismatched parenthesis in math expression");
-    }
-    for (int i=0)
-    return BaseVal;
-}
 
 
 
@@ -256,11 +242,38 @@ initMap(&map, 32, 32, Ent);
     default: "unknown")
 \
 
+
+int DoMath(int BaseVal, char ValuedString[]) {//First layer of math funcs, it is for checking if the parenthesis are correct and then sending the string of each alyer of parenthesis to the CalcEquation function. Also turns variables into raw numbers
+    strlen(ValuedString);
+    int LowestLayerParenthesis = 0;
+    int OpenParenthesis = 0;
+    int CloseParenthesis = 0;
+    
+    for (int i=0; i < strlen(ValuedString); i++) {//Check for parenthesis
+        switch (ValuedString[i]) {
+            case '(':
+                OpenParenthesis++;
+                break; 
+            case ')':
+                CloseParenthesis++;
+            break;
+        }
+    }
+    if (OpenParenthesis != CloseParenthesis) {
+        ReturnError("Mismatched parenthesis in math expression");
+    }
+    for (int i=0)
+    return BaseVal;
+}
+
+
+
+
 char *CreatedVars[0] = {};
 
-int InputedTextLength = sizeof(InputText) - 2;
+int InputedTextLength = strlen(InputText);
 char Setting[] = "Cont";//Cont means Continue
-char CurString[] = "";
+char CurString[] = {};
 
 
 
