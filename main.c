@@ -12,7 +12,7 @@ void ReturnError(char *ErrorMessage) {
     return;
 }
 
-inline int CalcExpression(int Num1,int Num2, char Operator) {//Last layer of math funcs, it is for solving small expressions like 2+2 or 3*4, etc
+inline float CalcExpression(float Num1,float Num2, char Operator) {//Last layer of math funcs, it is for solving small expressions like 2+2 or 3*4, etc
     switch (Operator) {
         case '+':
             return Num1 + Num2;
@@ -31,21 +31,16 @@ inline int CalcExpression(int Num1,int Num2, char Operator) {//Last layer of mat
              break;
         case '^':
             return pow(Num1, Num2);
-        case '_':
-        if (Num1 == 0) {
-            ReturnError("Cannot take the root of zero");
-        }
-        return  pow(Num2, 1 / Num1);//Im lazy so '_' is for sqrt
         break; 
         case '%':
         return Num1 % Num2;
         break;
+        //Square roots arent nessecary as they can be done with the ^ operator
         default:
             ReturnError("Invalid operator");
     }
 }
 
-char Numbers[10] = {'0','1','2','3','4','5','6','7','8','9'}; 
 
 int CalcEquation(char ValuedString[]) {//Second layer of math funcs, it is for getting the values and operators from a string and then sending them to the CalcExpression function
     float NewVal;
@@ -57,8 +52,27 @@ int CalcEquation(char ValuedString[]) {//Second layer of math funcs, it is for g
             return NewVal;
         }
         
+        char[] Number1BlockStart = "";
+        char[] Number1BlockEnd = "";
+        char[] Number2BlockStart = "";
+        char[] Number2BlockEnd = "";
+        char Operator = "";
+
         for (int i = 0; i < StringLength; i++) {
-            if () 
+            if (ValuedString[i] == '0' || ValuedString[i] == '1' || ValuedString[i] == '2' || ValuedString[i] == '3' || ValuedString[i] == '4' || ValuedString[i] == '5' || ValuedString[i] == '6' || ValuedString[i] == '7' || ValuedString[i] == '8' || ValuedString[i] == '9') {
+                if (Number1BlockStart == "") {
+                    Number1BlockStart = i;
+                } else if (Number2BlockEnd == "") {
+                    Number2BlockEnd = i;
+                    //PassNumbers to CalcExpression here, Undone
+                }
+                if (Number2BlockStart == "") {
+                    Number2BlockStart = i;
+                }
+            } else {
+                Operator = ValuedString[i];//Assume Operator is valid, CalcExpression will check if it is valid or not
+                Number1BlockEnd = ValuedString[i - 1];
+            }
         }
     }
     printf("Equation: %s\n", ValuedString);
@@ -248,7 +262,11 @@ int DoMath(int BaseVal, char ValuedString[]) {//First layer of math funcs, it is
     int LowestLayerParenthesis = 0;
     int OpenParenthesis = 0;
     int CloseParenthesis = 0;
-    
+    for (int i=0; i < strlen(ValuedString); i++) {//Remove spaces
+        if (ValuedString[i] == ' ') {
+            ValuedString[i] = '\0';//Remove spaces
+        }
+    }
     for (int i=0; i < strlen(ValuedString); i++) {//Check for parenthesis
         switch (ValuedString[i]) {
             case '(':
