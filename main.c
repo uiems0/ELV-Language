@@ -52,21 +52,31 @@ int CalcEquation(char ValuedString[]) {//Second layer of math funcs, it is for g
             return NewVal;
         }
         
-        char[] Number1BlockStart = "";
-        char[] Number1BlockEnd = "";
-        char[] Number2BlockStart = "";
-        char[] Number2BlockEnd = "";
-        char Operator = "";
+        int Number1BlockStart = -1;
+        int Number1BlockEnd = -1;
+        int Number2BlockStart = -1;
+        int Number2BlockEnd = -1;
+        char Operator = '\0';
 
         for (int i = 0; i < StringLength; i++) {
-            if (ValuedString[i] == '0' || ValuedString[i] == '1' || ValuedString[i] == '2' || ValuedString[i] == '3' || ValuedString[i] == '4' || ValuedString[i] == '5' || ValuedString[i] == '6' || ValuedString[i] == '7' || ValuedString[i] == '8' || ValuedString[i] == '9') {
-                if (Number1BlockStart == "") {
+            if (ValuedString[i] == '0' || ValuedString[i] == '1' || ValuedString[i] == '2' || ValuedString[i] == '3' || ValuedString[i] == '4' || ValuedString[i] == '5' || ValuedString[i] == '6' || ValuedString[i] == '7' || ValuedString[i] == '8' || ValuedString[i] == '9' || ValuedString[i] == '.') {
+                if (Number1BlockStart == -1) {
                     Number1BlockStart = i;
-                } else if (Number2BlockEnd == "") {
+                } else if (Number2BlockEnd == -1) {
                     Number2BlockEnd = i;
-                    //PassNumbers to CalcExpression here, Undone
+                    char Num1Str[256] = "";
+                    for (int j = Number1BlockStart; j <= Number1BlockEnd; j++) {
+                        strcat(Num1Str, &ValuedString[j]);
+                    }
+                    char Num2Str[256] = "";
+                    for (int j = Number2BlockStart; j <= Number2BlockEnd; j++) {
+                        strcat(Num2Str, &ValuedString[j]);
+                    }
+                    int Num1 = atof(Num1Str);
+                    int Num2 = atof(Num2Str);
+                    CalcExpression(Num1, Num2, Operator);
                 }
-                if (Number2BlockStart == "") {
+                if (Number2BlockStart == -1) {
                     Number2BlockStart = i;
                 }
             } else {
@@ -280,7 +290,9 @@ int DoMath(int BaseVal, char ValuedString[]) {//First layer of math funcs, it is
     if (OpenParenthesis != CloseParenthesis) {
         ReturnError("Mismatched parenthesis in math expression");
     }
-    for (int i=0)
+    while (OpenParenthesis > 0) {//Todo, Ik what to do but im out of time today
+
+    }
     return BaseVal;
 }
 
