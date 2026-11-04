@@ -42,7 +42,7 @@ inline float CalcExpression(float Num1,float Num2, char Operator) {//Last layer 
 }
 
 
-int CalcEquation(char ValuedString[]) {//Second layer of math funcs, it is for getting the values and operators from a string and then sending them to the CalcExpression function
+int CalcEquation(char ValuedString[]) {//Second layer of math funcs, it is for getting the values and operators from a string and then sending them to the CalcExpression function. Im sick of working on math so ima do smth else
     float NewVal;
     bool Finished = false;
     int StringLength = strlen(ValuedString);
@@ -58,23 +58,33 @@ int CalcEquation(char ValuedString[]) {//Second layer of math funcs, it is for g
         int Number2BlockEnd = -1;
         char Operator = '\0';
 
+        char StringBlocks[][] = {};//Will order string from left to right, in order of operations
+
+
         for (int i = 0; i < StringLength; i++) {
             if (ValuedString[i] == '0' || ValuedString[i] == '1' || ValuedString[i] == '2' || ValuedString[i] == '3' || ValuedString[i] == '4' || ValuedString[i] == '5' || ValuedString[i] == '6' || ValuedString[i] == '7' || ValuedString[i] == '8' || ValuedString[i] == '9' || ValuedString[i] == '.') {
-                if (Number1BlockStart == -1) {
+                if (Number1BlockStart == -1) {//This still needs to able to to follow the order of operations
                     Number1BlockStart = i;
                 } else if (Number2BlockEnd == -1) {
                     Number2BlockEnd = i;
-                    char Num1Str[256] = "";
+                    char Num1Str[] = "";
                     for (int j = Number1BlockStart; j <= Number1BlockEnd; j++) {
-                        strcat(Num1Str, &ValuedString[j]);
+                        strcat(Num1Str, ValuedString[j]);
                     }
-                    char Num2Str[256] = "";
+                    char Num2Str[] = "";
                     for (int j = Number2BlockStart; j <= Number2BlockEnd; j++) {
-                        strcat(Num2Str, &ValuedString[j]);
+                        strcat(Num2Str, ValuedString[j]);
                     }
                     int Num1 = atof(Num1Str);
                     int Num2 = atof(Num2Str);
-                    CalcExpression(Num1, Num2, Operator);
+                    int Result = CalcExpression(Num1, Num2, Operator);
+                    for (int j = Number1BlockStart; j <= Number1BlockEnd; j++) {
+                        ValuedString[j] = '\0';
+                    }
+                    for (int j = Number2BlockStart; j <= Number2BlockEnd; j++) {
+                        ValuedString[j] = '\0';
+                    }
+                    
                 }
                 if (Number2BlockStart == -1) {
                     Number2BlockStart = i;
@@ -290,7 +300,8 @@ int DoMath(int BaseVal, char ValuedString[]) {//First layer of math funcs, it is
     if (OpenParenthesis != CloseParenthesis) {
         ReturnError("Mismatched parenthesis in math expression");
     }
-    while (OpenParenthesis > 0) {//Todo, Ik what to do but im out of time today
+    //Extreme example so i can design the system around a case like this: Var = 2+(3*4(4(1+1)(9%2*4)))+(9+5)
+    while (OpenParenthesis > 0) {
 
     }
     return BaseVal;
@@ -339,14 +350,15 @@ void CreateVar (char VarName[], map *map, bool Global, char CurString[], int Cur
     }
 }
 
-bool IsInFuncion = false;
+bool IsInFunction = false;
 
-char NilUnasignedVars[][] = {};#For vars that are nil or unasigned
+char NilUnasignedVars[][] = {};
+char NilUnasignedGlobalVars[][] = {};
 
 
 
 for (int i = 0; i <= InputedTextLength ; i++ ) 
-    if (IsInFuncion == true) {
+    if (IsInFunction == true) {
     } else {
     CurString = strcat(CurString,InputText[i]);
     
