@@ -41,31 +41,20 @@ inline float CalcExpression(float Num1,float Num2, char Operator) {//Last layer 
     }
 }
 
-
-int CalcEquation(char ValuedString[]) {//Second layer of math funcs, it is for getting the values and operators from a string and then sending them to the CalcExpression function. Im sick of working on math so ima do smth else
-    float NewVal;
-    bool Finished = false;
-    int StringLength = strlen(ValuedString);
-
-    while (Finished == false) {
-        if (Finished == true) {
-            return NewVal;
-        }
-        
+static inline int GetBlock(char ValuedString[], int StartIndex, int EndIndex, char ValidOp1[], char ValidOp2[]) {//Gets a block of a string from the start index to the end index
         int Number1BlockStart = -1;
         int Number1BlockEnd = -1;
         int Number2BlockStart = -1;
         int Number2BlockEnd = -1;
         char Operator = '\0';
 
-        char StringBlocks[][] = {};//Will order string from left to right, in order of operations
+        //Not Done, I plan to add a way to have an array like ReturnedValues[] = {"Val1StringBlock"=Val1} to save on performance, but for now this will do
 
-
-        for (int i = 0; i < StringLength; i++) {
+        for (int i = 0; i < strlen(ValuedString); i++) {
             if (ValuedString[i] == '0' || ValuedString[i] == '1' || ValuedString[i] == '2' || ValuedString[i] == '3' || ValuedString[i] == '4' || ValuedString[i] == '5' || ValuedString[i] == '6' || ValuedString[i] == '7' || ValuedString[i] == '8' || ValuedString[i] == '9' || ValuedString[i] == '.') {
                 if (Number1BlockStart == -1) {//This still needs to able to to follow the order of operations
                     Number1BlockStart = i;
-                } else if (Number2BlockEnd == -1) {
+                } else if (Number2BlockEnd == -1 && (ValuedString[i +1] == '^' || ValuedString[i+1] == '_' || ValuedString[i+1] == '*' || ValuedString[i+1] == '/' || ValuedString[i+1] == '-' || ValuedString[i+1] == '+')) {
                     Number2BlockEnd = i;
                     char Num1Str[] = "";
                     for (int j = Number1BlockStart; j <= Number1BlockEnd; j++) {
@@ -75,7 +64,39 @@ int CalcEquation(char ValuedString[]) {//Second layer of math funcs, it is for g
                     for (int j = Number2BlockStart; j <= Number2BlockEnd; j++) {
                         strcat(Num2Str, ValuedString[j]);
                     }
-                    int Num1 = atof(Num1Str);
+                    int AcqVal = CalcExpression(atof(Num1Str), atof(Num2Str), Operator);
+                    return AcqVal;
+                }
+                if (Number2BlockStart == -1) {
+                    Number2BlockStart = i;
+                }
+            } else if (ValuedString[i] == ValidOp1 || ValuedString[i] == ValidOp2) {//Parenthesis are handled in the DoMath function, so they are not needed here, Instead this loop is for the exponents in PEMDAS
+                Operator = ValuedString[i];//Assume Operator is valid, CalcExpression will check if it is valid or not
+                Number1BlockEnd = ValuedString[i - 1];
+            }
+    }
+    ReturnError("Invalid expression");
+}
+
+int CalcEquation(char ValuedString[]) {//Second layer of math funcs, it is for getting the values and operators from a string and then sending them to the CalcExpression function. Im sick of working on math so ima do smth else
+    float NewVal;
+    bool Finished = false;
+
+    while (Finished == false) {
+        if (Finished == true) {
+            return NewVal;
+        }
+        
+
+
+    }
+    printf("Equation: %s\n", ValuedString);
+}
+
+
+
+//Storing for later as i need to redo the math system
+/*                    int Num1 = atof(Num1Str);
                     int Num2 = atof(Num2Str);
                     int Result = CalcExpression(Num1, Num2, Operator);
                     for (int j = Number1BlockStart; j <= Number1BlockEnd; j++) {
@@ -83,25 +104,7 @@ int CalcEquation(char ValuedString[]) {//Second layer of math funcs, it is for g
                     }
                     for (int j = Number2BlockStart; j <= Number2BlockEnd; j++) {
                         ValuedString[j] = '\0';
-                    }
-                    
-                }
-                if (Number2BlockStart == -1) {
-                    Number2BlockStart = i;
-                }
-            } else {
-                Operator = ValuedString[i];//Assume Operator is valid, CalcExpression will check if it is valid or not
-                Number1BlockEnd = ValuedString[i - 1];
-            }
-        }
-    }
-    printf("Equation: %s\n", ValuedString);
-}
-
-
-
-
-
+                    }*/
 
 typedef struct {
     void *Entries;
