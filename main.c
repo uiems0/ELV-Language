@@ -1,9 +1,8 @@
-//I may need to remake how this language works as im not sure on how ill make it run functions and local + global vars. Will most likely make it read the code first, and then retroactivally run activate things, so that global vars can exist
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <math.h>
 
 int CurLine=0; // Keeps track of the line, 
 
@@ -12,7 +11,28 @@ void ReturnError(char *ErrorMessage) {
     return;
 }
 
-inline float CalcExpression(float Num1,float Num2, char Operator) {//Last layer of math funcs, it is for solving small expressions like 2+2 or 3*4, etc
+inline float CalcExpression(char RecievedString[]) {//Last layer of math funcs, it is for solving small expressions like 2+2 or 3*4, etc
+    float Num1 = 0;
+    float Num2 = 0;
+    char Operator = '\0';
+
+    //Break RecievedString into Num1, Num2, and Operator
+    for (int i = 0; i < strlen(RecievedString); i++) {
+        if (RecievedString[i] == "^" || RecievedString[i] == "_" || RecievedString[i] == "*" || RecievedString[i] == "/" || RecievedString[i] == "-" || RecievedString[i] == "+") {
+            Operator = RecievedString[i];
+            char Num1Str[] = "";
+            for (int j = 0; j < i; j++) {
+                strcat(Num1Str, RecievedString[j]);
+            }
+            char Num2Str[] = "";
+            for (int j = i + 1; j < strlen(RecievedString); j++) {
+                strcat(Num2Str, RecievedString[j]);
+            }
+            Num1 = atof(Num1Str);
+            Num2 = atof(Num2Str);
+        }
+    }
+
     switch (Operator) {
         case '+':
             return Num1 + Num2;
@@ -33,7 +53,7 @@ inline float CalcExpression(float Num1,float Num2, char Operator) {//Last layer 
             return pow(Num1, Num2);
         break; 
         case '%':
-        return Num1 % Num2;
+        return fmod(Num1, Num2);
         break;
         //Square roots arent nessecary as they can be done with the ^ operator
         default:
@@ -41,14 +61,14 @@ inline float CalcExpression(float Num1,float Num2, char Operator) {//Last layer 
     }
 }
 
-static inline int GetBlock(char ValuedString[], int StartIndex, int EndIndex, char ValidOp1[], char ValidOp2[]) {//Gets a block of a string from the start index to the end index
+char GetBlock(char ValuedString[], char ValidOp1[], char ValidOp2[],char ValidOp3[]) {//Gets a block of a string from the start index to the end index. Valid Op 3 exists for modulo, which is in the in the first layer
         int Number1BlockStart = -1;
         int Number1BlockEnd = -1;
         int Number2BlockStart = -1;
         int Number2BlockEnd = -1;
         char Operator = '\0';
 
-        //Not Done, I plan to add a way to have an array like ReturnedValues[] = {"Val1StringBlock"=Val1} to save on performance, but for now this will do
+        //Not Done
 
         for (int i = 0; i < strlen(ValuedString); i++) {
             if (ValuedString[i] == '0' || ValuedString[i] == '1' || ValuedString[i] == '2' || ValuedString[i] == '3' || ValuedString[i] == '4' || ValuedString[i] == '5' || ValuedString[i] == '6' || ValuedString[i] == '7' || ValuedString[i] == '8' || ValuedString[i] == '9' || ValuedString[i] == '.') {
@@ -64,31 +84,77 @@ static inline int GetBlock(char ValuedString[], int StartIndex, int EndIndex, ch
                     for (int j = Number2BlockStart; j <= Number2BlockEnd; j++) {
                         strcat(Num2Str, ValuedString[j]);
                     }
-                    int AcqVal = CalcExpression(atof(Num1Str), atof(Num2Str), Operator);
-                    return AcqVal;
+                    char StringRes[] = "";
+                    sprintf(StringRes, "%d", i);
+                    strcat(StringRes, Num1Str);
+                    strcat(StringRes, Num2Str);
+                    return StringRes;
                 }
                 if (Number2BlockStart == -1) {
                     Number2BlockStart = i;
                 }
-            } else if (ValuedString[i] == ValidOp1 || ValuedString[i] == ValidOp2) {//Parenthesis are handled in the DoMath function, so they are not needed here, Instead this loop is for the exponents in PEMDAS
+            } else if (ValuedString[i] == ValidOp1 || ValuedString[i] == ValidOp2 || ValuedString[i] == ValidOp3) {//Parenthesis are handled in the DoMath function, so they are not needed here, Instead this loop is for the exponenets then Multiplication and division and so on
                 Operator = ValuedString[i];//Assume Operator is valid, CalcExpression will check if it is valid or not
                 Number1BlockEnd = ValuedString[i - 1];
+            } else {//returns to null if the character is not a valid operator so that it doesn't select wrong chars, for ex "123*456" in "123+1*456" 
+                Number1BlockStart = -1;
+                Number1BlockEnd = -1;
             }
     }
-    ReturnError("Invalid expression");
+    return "NMIL"//No More In Layer, used to tell Calc Equation  that the  layer is done andd to go down to the next layer
 }
+
+
+
 
 int CalcEquation(char ValuedString[]) {//Second layer of math funcs, it is for getting the values and operators from a string and then sending them to the CalcExpression function. Im sick of working on math so ima do smth else
     float NewVal;
     bool Finished = false;
-
+    int Layer = 2;
+    char Arr[] = {};
     while (Finished == false) {
         if (Finished == true) {
             return NewVal;
         }
         
-
-
+        if (Layer == 2) {
+            char Block[] = GetBlock(ValuedString, "^", "_", " ");//Use space as a placeholder for the third operator, which is modulo, as it is not needed in this layer. Also Space was removed in the firstb layer of the math functions
+            if (Block == "NMIL") {
+                Layer = 1;
+            } else {
+                int Start = StringRes[0];
+                StringRes[0] = '\t';
+                int NewNum = CalcExpression(Block);
+                ftoa(NewNum, Arr, 12);
+                StringRes[Start] = Arr[0];
+                Arr[0] = '\0';
+            }
+        } else if (Layer == 1) {//Ima assume that doing "%" is fine for now because my internet is being weird and i cant look it up
+            char Block[] = GetBlock(ValuedString, "*", "/", "%");//Use space as a placeholder for the third operator, which is modulo, as it is not needed in this layer. Also Space was removed in the firstb layer of the math functions
+            if (Block == "NMIL") {
+                Layer = 0;
+            } else {
+                int Start = StringRes[0];
+                StringRes[0] = '\t';
+                int NewNum = CalcExpression(Block);
+                ftoa(NewNum, Arr, 12);
+                StringRes[Start] = Arr[0];
+                Arr[0] = '\0';
+            }
+        } else if (Layer == 0) {//Ima assume that doing "%" is fine for now because my internet is being weird and i cant look it up
+            char Block[] = GetBlock(ValuedString, "+", "-", " ");//Use space as a placeholder for the third operator, which is modulo, as it is not needed in this layer. Also Space was removed in the firstb layer of the math functions
+            if (Block == "NMIL") {
+                Finished = true;
+            } else {
+                int Start = StringRes[0];
+                StringRes[0] = '\t';
+                int NewNum = CalcExpression(Block);
+                ftoa(NewNum, Arr, 12);
+                StringRes[Start] = Arr[0];
+                Arr[0] = '\0';
+                NewVal = atof(StringRes);
+            }
+        }
     }
     printf("Equation: %s\n", ValuedString);
 }
@@ -359,7 +425,7 @@ char NilUnasignedVars[][] = {};
 char NilUnasignedGlobalVars[][] = {};
 
 
-
+int main() {
 for (int i = 0; i <= InputedTextLength ; i++ ) 
     if (IsInFunction == true) {
     } else {
@@ -530,4 +596,4 @@ for (int i = 0; i <= InputedTextLength ; i++ )
             CurString = "";
             break;
     }
-}};
+}}};
