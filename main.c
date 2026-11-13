@@ -18,7 +18,7 @@ inline float CalcExpression(char RecievedString[]) {//Last layer of math funcs, 
 
     //Break RecievedString into Num1, Num2, and Operator
     for (int i = 0; i < strlen(RecievedString); i++) {
-        if (RecievedString[i] == "^" || RecievedString[i] == "_" || RecievedString[i] == "*" || RecievedString[i] == "/" || RecievedString[i] == "-" || RecievedString[i] == "+") {
+        if (strcmp(RecievedString[i], "^") == 0 || strcmp(RecievedString[i], "_") == 0 || strcmp(RecievedString[i], "*") == 0 || strcmp(RecievedString[i], "/") == 0 || strcmp(RecievedString[i], "-") == 0 || strcmp(RecievedString[i], "+") == 0) {
             Operator = RecievedString[i];
             char Num1Str[] = "";
             for (int j = 0; j < i; j++) {
@@ -71,10 +71,10 @@ char GetBlock(char ValuedString[], char ValidOp1[], char ValidOp2[],char ValidOp
         //Not Done
 
         for (int i = 0; i < strlen(ValuedString); i++) {
-            if (ValuedString[i] == '0' || ValuedString[i] == '1' || ValuedString[i] == '2' || ValuedString[i] == '3' || ValuedString[i] == '4' || ValuedString[i] == '5' || ValuedString[i] == '6' || ValuedString[i] == '7' || ValuedString[i] == '8' || ValuedString[i] == '9' || ValuedString[i] == '.') {
+            if (strcmp(ValuedString[i], "1") == 0 || strcmp(ValuedString[i], "2") == 0 || strcmp(ValuedString[i], "3") == 0 || strcmp(ValuedString[i], "4") == 0 || strcmp(ValuedString[i], "5") == 0 || strcmp(ValuedString[i], "6") == 0 || strcmp(ValuedString [i], "7") == 0 || strcmp(ValuedString [i], "8") == 0 || strcmp(ValuedString[i], "9") == 0 || strcmp(ValuedString[i], ".") == 0) {
                 if (Number1BlockStart == -1) {//This still needs to able to to follow the order of operations
                     Number1BlockStart = i;
-                } else if (Number2BlockEnd == -1 && (ValuedString[i +1] == '^' || ValuedString[i+1] == '_' || ValuedString[i+1] == '*' || ValuedString[i+1] == '/' || ValuedString[i+1] == '-' || ValuedString[i+1] == '+')) {
+                } else if (Number2BlockEnd == -1 && (strcmp(ValuedString[i+1], "^") == 0 || strcmp(ValuedString[i+1], "_") == 0 || strcmp(ValuedString[i+1], "*") == 0 || strcmp(ValuedString[i+1], "/") == 0 || strcmp(ValuedString[i+1], "-") == 0 || strcmp(ValuedString[i+1], "+") == 0)) {
                     Number2BlockEnd = i;
                     char Num1Str[] = "";
                     for (int j = Number1BlockStart; j <= Number1BlockEnd; j++) {
@@ -93,7 +93,7 @@ char GetBlock(char ValuedString[], char ValidOp1[], char ValidOp2[],char ValidOp
                 if (Number2BlockStart == -1) {
                     Number2BlockStart = i;
                 }
-            } else if (ValuedString[i] == ValidOp1 || ValuedString[i] == ValidOp2 || ValuedString[i] == ValidOp3) {//Parenthesis are handled in the DoMath function, so they are not needed here, Instead this loop is for the exponenets then Multiplication and division and so on
+            } else if (strcmp(ValuedString[i], ValidOp1) == 0 || strcmp(ValuedString[i], ValidOp2) == 0 || strcmp(ValuedString[i], ValidOp3) == 0) {//Parenthesis are handled in the DoMath function, so they are not needed here, Instead this loop is for the exponenets then Multiplication and division and so on
                 Operator = ValuedString[i];//Assume Operator is valid, CalcExpression will check if it is valid or not
                 Number1BlockEnd = ValuedString[i - 1];
             } else {//returns to null if the character is not a valid operator so that it doesn't select wrong chars, for ex "123*456" in "123+1*456" 
@@ -101,7 +101,7 @@ char GetBlock(char ValuedString[], char ValidOp1[], char ValidOp2[],char ValidOp
                 Number1BlockEnd = -1;
             }
     }
-    return "NMIL"//No More In Layer, used to tell Calc Equation  that the  layer is done andd to go down to the next layer
+    return 'n'//No More In Layer, used to tell Calc Equation  that the  layer is done andd to go down to the next layer
 }
 
 
@@ -119,7 +119,7 @@ int CalcEquation(char ValuedString[]) {//Second layer of math funcs, it is for g
         
         if (Layer == 2) {
             char Block[] = GetBlock(ValuedString, "^", "_", " ");//Use space as a placeholder for the third operator, which is modulo, as it is not needed in this layer. Also Space was removed in the firstb layer of the math functions
-            if (Block == "NMIL") {
+            if (Block == 'n') {
                 Layer = 1;
             } else {
                 int Start = StringRes[0];
@@ -131,7 +131,7 @@ int CalcEquation(char ValuedString[]) {//Second layer of math funcs, it is for g
             }
         } else if (Layer == 1) {//Ima assume that doing "%" is fine for now because my internet is being weird and i cant look it up
             char Block[] = GetBlock(ValuedString, "*", "/", "%");//Use space as a placeholder for the third operator, which is modulo, as it is not needed in this layer. Also Space was removed in the firstb layer of the math functions
-            if (Block == "NMIL") {
+            if (Block == 'n') {
                 Layer = 0;
             } else {
                 int Start = StringRes[0];
@@ -143,7 +143,7 @@ int CalcEquation(char ValuedString[]) {//Second layer of math funcs, it is for g
             }
         } else if (Layer == 0) {//Ima assume that doing "%" is fine for now because my internet is being weird and i cant look it up
             char Block[] = GetBlock(ValuedString, "+", "-", " ");//Use space as a placeholder for the third operator, which is modulo, as it is not needed in this layer. Also Space was removed in the firstb layer of the math functions
-            if (Block == "NMIL") {
+            if (Block == 'n') {
                 Finished = true;
             } else {
                 int Start = StringRes[0];
@@ -390,7 +390,7 @@ char CurString[] = {};
 char CurrentlyCreatingVar[] = "";
 
 void CreateVar (char VarName[], map *map, bool Global, char CurString[], int CurStringNum) {
-        if (strstr(VarName, "\"") != NULL) {
+        if (strcmp(VarName, "\"") == 0) {
             int RemoveQuotes = 0;
             for (int j = 0; j < strlen(VarName); j++) {
                 if (CurString[CurStringNum] == '\"') {
@@ -403,9 +403,9 @@ void CreateVar (char VarName[], map *map, bool Global, char CurString[], int Cur
              }
              mapPut(&map, CurrentlyCreatingVar, VarName);
             } else {
-            if (strstr(VarName, "true") != NULL) {
+            if (strcmp(VarName, "true") == 0) {
                mapPut(&map, CurrentlyCreatingVar, true);
-            } else if (strstr(VarName, "false") != NULL) {
+            } else if (strcmp(VarName, "false") == 0) {
              mapPut(&map, CurrentlyCreatingVar, false);
             } else {
             char *endptr;
@@ -428,32 +428,25 @@ char NilUnasignedGlobalVars[][] = {};
 int main() {
 for (int i = 0; i <= InputedTextLength ; i++ ) 
     if (IsInFunction == true) {
-    } else {
-    CurString = strcat(CurString,InputText[i]);
-    
-    switch(Setting) {
+    } else {//Brackets are mismatched, I dont know where
+        CurString = strcat(CurString,InputText[i]);
 
-        case "MultilineCommenting":
+        if (strcmp(Setting,"MultilineCommenting") == 0) {
          if (strstr(CurString,"~|") != NULL) {
             Setting = "Cont";
             CurString = "";
-        }
-        break;
-
-        case "Commenting":
+         }
+        } else if (strcmp(Setting,"Commenting") == 0) {
          if (strstr(CurString,"\t") != NULL) {
             Setting = "Cont";
             CurString = "";
-        }
-
-        break;
-            case "Log":
+         }
+        } else if (strcmp(Setting,"Log") == 0) {
             if (strstr(CurString,"(") != NULL) {
             Setting = "StartLogging";
             CurString = "";
-        }
-        break;
-        case "StartLogging":
+            }
+        } else if (strcmp(Setting,"StartLogging") == 0) {
             if (strstr(CurString,")") != NULL && strstr(CurString,"\t") != NULL) {
 
                 char MinSetting[] = "nil";
@@ -476,27 +469,27 @@ for (int i = 0; i <= InputedTextLength ; i++ )
                 printf("%s", ToPrint);
             Setting = "Cont";
             CurString = "";
-        }
-        case "SpaceVar":
+        } else if (strcmp(Setting,"SpaceVar") == 0) {
+        
             if (strstr(CurString," ") != NULL) {
             Setting = "NameVar";
             CurString = "";
-        }
-        break;
-        case "NameVar":
+            }
+        } else if (strcmp(Setting,"NameVar") == 0) {
+        
             if (strstr(CurString," ") != NULL) {
             Setting = "TypeVarVal";
             CurrentlyCreatingVar = CurString;
             CurString = "";
-        }
-        break;
-        case "TypeVarVal":
+            }
+        } else if (strcmp(Setting,"NameVar") == 0) {
+       
             if (strstr(CurString," ") != NULL) {
             Setting = "ValVar";
             CurString = "";
-        }
-        break;
-        case "ValVar":
+            }
+        }  else if (strcmp(Setting,"ValVar") == 0) {
+        
             if (strstr(CurString,"\t") != NULL) {
             
             char CheckingString[] = InputText[i] - strlen(CurString);
@@ -505,28 +498,24 @@ for (int i = 0; i <= InputedTextLength ; i++ )
             
             Setting = "Cont";
             CurString = "";
-        }
-        break;
-        case "GSpaceVar":
+        } else if (strcmp(Setting,"GSpaceVar") == 0) {
+        
             if (strstr(CurString," ") != NULL) {
             Setting = "GNameVar";
             CurString = "";
-        }
-        break;
-        case "GNameVar":
+        } else if (strcmp(Setting,"GNameVar") == 0) {
+        
             if (strstr(CurString," ") != NULL) {
             Setting = "GTypeVarVal";
             CurrentlyCreatingVar = CurString;
             CurString = "";
-        }
-        break;
-        case "GTypeVarVal":
+        } else if (strcmp(Setting,"GTypeVarVal") == 0) {
+        
             if (strstr(CurString," ") != NULL) {
             Setting = "GValVar";
             CurString = "";
-        }
-        break;
-        case "GValVar":
+        } else if (strcmp(Setting,"GValVar") == 0) {
+       
             if (strstr(CurString,"\t") != NULL) {
             
             char CheckingString[] = InputText[i] - strlen(CurString);
@@ -536,64 +525,62 @@ for (int i = 0; i <= InputedTextLength ; i++ )
             Setting = "Cont";
             CurString = "";
         }
-        break;
-
+    }
     }
 
-    switch (CurString) {
-
-        case "/t":
-        CurLine++;
-         if (strcamp(Setting, "Commenting") == 0) {// If the setting is "Commenting", we ignore untill the tab character
+        if (strstr(CurString,"\t") != NULL) {
+         CurLine++;
+             if (strcmp(CurString, "Commenting") == 0) {// If the setting is "Commenting", we ignore untill the tab character
             Setting = "Cont";
-        }
-        break;
-        case "Func":
+            }
+        } else if (strcmp(CurString, "Func") == 0) {
+        
             printf("Keyword: Func\n");
-            break;
-        case "Var":
+        } else if (strcmp(CurString, "Var") == 0) {
+       
             printf("Keyword: Var\n");
 
             Setting = "SpaceVar";
 
-            break;
-        case "GlobalVar":
+        
+        } else if (strcmp(CurString, "GlobalVar") == 0) {
+        
             printf("Keyword: GlobalVar\n");
             Setting = "GSpaceVar";
-            break;
-        case "For":
+        } else if (strcmp(CurString, "For") == 0) {
             printf("Keyword: For\n");
-            break;
-        case "While":
+        } else if (strcmp(CurString, "While") == 0) {
+        
             printf("Keyword: While\n");
-            break;
-        case "If":
+        } else if (strcmp(CurString, "If") == 0) {
+        
             printf("Keyword: If\n");
-            break;
-        case "Do":
+        } else if (strcmp(CurString, "Do") == 0) {
+        
             printf("Keyword: Do\n");
-            break;
-        case "Then":
+        } else if (strcmp(CurString, "Then") == 0) {
+        
             printf("Keyword: Then\n");
-            break;
-        case "End":
+        } else if (strcmp(CurString, "End") == 0) {
+        
             printf("Keyword: End\n");
             break;
-            case  "~":
+        } else  if (strcmp(CurString, "~") == 0) {
+       
             printf("Keyword: ~\n");
             Setting = "Commenting";
-            break;
-        case "|~":
+        } else if (strcmp(CurString, "|~") == 0) {
+        
             printf("Keyword: |~\n");
             Setting = "MultilineCommenting";
-            break;
-        case "Elseif":
+        } else if (strcmp(CurString, "Elseif") == 0) {
+        
             printf("Keyword: Elseif\n");
-            break;
-        case "Log":
+        } else if (strcmp(CurString, "Log") == 0) {
+        
             printf("Keyword: Log(\n");
             Setting = "Log";
             CurString = "";
-            break;
-    }
-}}};
+        }
+            
+}}}};
