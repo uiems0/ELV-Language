@@ -71,7 +71,7 @@ char GetBlock(char ValuedString[], char ValidOp1[], char ValidOp2[],char ValidOp
         //Not Done
 
         for (int i = 0; i < strlen(ValuedString); i++) {
-            if (strcmp(ValuedString[i], "1") == 0 || strcmp(ValuedString[i], "2") == 0 || strcmp(ValuedString[i], "3") == 0 || strcmp(ValuedString[i], "4") == 0 || strcmp(ValuedString[i], "5") == 0 || strcmp(ValuedString[i], "6") == 0 || strcmp(ValuedString [i], "7") == 0 || strcmp(ValuedString [i], "8") == 0 || strcmp(ValuedString[i], "9") == 0 || strcmp(ValuedString[i], ".") == 0) {
+            if (ValuedString[i] - '0' >= 0  || strcmp(ValuedString[i], ".") == 0) {
                 if (Number1BlockStart == -1) {//This still needs to able to to follow the order of operations
                     Number1BlockStart = i;
                 } else if (Number2BlockEnd == -1 && (strcmp(ValuedString[i+1], "^") == 0 || strcmp(ValuedString[i+1], "_") == 0 || strcmp(ValuedString[i+1], "*") == 0 || strcmp(ValuedString[i+1], "/") == 0 || strcmp(ValuedString[i+1], "-") == 0 || strcmp(ValuedString[i+1], "+") == 0)) {
@@ -129,7 +129,7 @@ int CalcEquation(char ValuedString[]) {//Second layer of math funcs, it is for g
                 StringRes[Start] = Arr[0];
                 Arr[0] = '\0';
             }
-        } else if (Layer == 1) {//Ima assume that doing "%" is fine for now because my internet is being weird and i cant look it up
+        } else if (Layer == 1) {//Ima assume that doing "%" is fine. | it is fine
             char Block[] = GetBlock(ValuedString, "*", "/", "%");//Use space as a placeholder for the third operator, which is modulo, as it is not needed in this layer. Also Space was removed in the firstb layer of the math functions
             if (Block == 'n') {
                 Layer = 0;
@@ -141,7 +141,7 @@ int CalcEquation(char ValuedString[]) {//Second layer of math funcs, it is for g
                 StringRes[Start] = Arr[0];
                 Arr[0] = '\0';
             }
-        } else if (Layer == 0) {//Ima assume that doing "%" is fine for now because my internet is being weird and i cant look it up
+        } else if (Layer == 0) {
             char Block[] = GetBlock(ValuedString, "+", "-", " ");//Use space as a placeholder for the third operator, which is modulo, as it is not needed in this layer. Also Space was removed in the firstb layer of the math functions
             if (Block == 'n') {
                 Finished = true;
@@ -161,16 +161,7 @@ int CalcEquation(char ValuedString[]) {//Second layer of math funcs, it is for g
 
 
 
-//Storing for later as i need to redo the math system
-/*                    int Num1 = atof(Num1Str);
-                    int Num2 = atof(Num2Str);
-                    int Result = CalcExpression(Num1, Num2, Operator);
-                    for (int j = Number1BlockStart; j <= Number1BlockEnd; j++) {
-                        ValuedString[j] = '\0';
-                    }
-                    for (int j = Number2BlockStart; j <= Number2BlockEnd; j++) {
-                        ValuedString[j] = '\0';
-                    }*/
+
 
 typedef struct {
     void *Entries;
@@ -347,7 +338,6 @@ initMap(&map, 32, 32, Ent);
 
 
 int DoMath(int BaseVal, char ValuedString[]) {//First layer of math funcs, it is for checking if the parenthesis are correct and then sending the string of each alyer of parenthesis to the CalcEquation function. Also turns variables into raw numbers
-    strlen(ValuedString);
     int LowestLayerParenthesis = 0;
     int OpenParenthesis = 0;
     int CloseParenthesis = 0;
@@ -360,9 +350,17 @@ int DoMath(int BaseVal, char ValuedString[]) {//First layer of math funcs, it is
         switch (ValuedString[i]) {
             case '(':
                 OpenParenthesis++;
+                if (Valuedstring[i-1] != NULL && ValuedString[i-1] >= 0) {
+                    int CSize = strlen(ValuedString)
+                    memove(&ValuedString[i],ValuedString[i],CSize-i)
+                }
                 break; 
             case ')':
                 CloseParenthesis++;
+                if (Valuedstring[i+1] != NULL && ValuedString[i+1] >= 0) {
+                    int CSize = strlen(ValuedString)
+                    memove(&ValuedString[i+1],ValuedString[i],CSize-i+1)
+                }
             break;
         }
     }
@@ -428,7 +426,7 @@ char NilUnasignedGlobalVars[][] = {};
 int main() {
 for (int i = 0; i <= InputedTextLength ; i++ ) 
     if (IsInFunction == true) {
-    } else {//Brackets are mismatched, I dont know where
+    } else {//Brackets are mismatched|Fixed
         CurString = strcat(CurString,InputText[i]);
 
         if (strcmp(Setting,"MultilineCommenting") == 0) {
@@ -466,6 +464,8 @@ for (int i = 0; i <= InputedTextLength ; i++ )
                         ToPrint = strcat(ToPrint,CurString[j]);//Unfinished, needs to add variable reading and a way to differentiate between values like log("J",Var)
                     }
                 }
+            }
+        }
                 printf("%s", ToPrint);
             Setting = "Cont";
             CurString = "";
@@ -498,11 +498,13 @@ for (int i = 0; i <= InputedTextLength ; i++ )
             
             Setting = "Cont";
             CurString = "";
+        }
         } else if (strcmp(Setting,"GSpaceVar") == 0) {
         
             if (strstr(CurString," ") != NULL) {
             Setting = "GNameVar";
             CurString = "";
+        }
         } else if (strcmp(Setting,"GNameVar") == 0) {
         
             if (strstr(CurString," ") != NULL) {
@@ -525,8 +527,8 @@ for (int i = 0; i <= InputedTextLength ; i++ )
             Setting = "Cont";
             CurString = "";
         }
-    }
-    }
+    
+    
 
         if (strstr(CurString,"\t") != NULL) {
          CurLine++;
@@ -582,5 +584,4 @@ for (int i = 0; i <= InputedTextLength ; i++ )
             Setting = "Log";
             CurString = "";
         }
-            
-}}}};
+}}}}};
