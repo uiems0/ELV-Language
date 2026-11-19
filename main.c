@@ -101,7 +101,7 @@ char GetBlock(char ValuedString[], char ValidOp1[], char ValidOp2[],char ValidOp
                 Number1BlockEnd = -1;
             }
     }
-    return 'n'//No More In Layer, used to tell Calc Equation  that the  layer is done andd to go down to the next layer
+    return 'n';//No More In Layer, used to tell Calc Equation  that the  layer is done andd to go down to the next layer
 }
 
 
@@ -118,7 +118,7 @@ int CalcEquation(char ValuedString[]) {//Second layer of math funcs, it is for g
         }
         
         if (Layer == 2) {
-            char Block[] = GetBlock(ValuedString, "^", "_", " ");//Use space as a placeholder for the third operator, which is modulo, as it is not needed in this layer. Also Space was removed in the firstb layer of the math functions
+            char Block[] = GetBlock(ValuedString, "^", "_", " ");
             if (Block == 'n') {
                 Layer = 1;
             } else {
@@ -130,7 +130,7 @@ int CalcEquation(char ValuedString[]) {//Second layer of math funcs, it is for g
                 Arr[0] = '\0';
             }
         } else if (Layer == 1) {//Ima assume that doing "%" is fine. | it is fine
-            char Block[] = GetBlock(ValuedString, "*", "/", "%");//Use space as a placeholder for the third operator, which is modulo, as it is not needed in this layer. Also Space was removed in the firstb layer of the math functions
+            char Block[] = GetBlock(ValuedString, "*", "/", "%");
             if (Block == 'n') {
                 Layer = 0;
             } else {
@@ -142,10 +142,7 @@ int CalcEquation(char ValuedString[]) {//Second layer of math funcs, it is for g
                 Arr[0] = '\0';
             }
         } else if (Layer == 0) {
-            char Block[] = GetBlock(ValuedString, "+", "-", " ");//Use space as a placeholder for the third operator, which is modulo, as it is not needed in this layer. Also Space was removed in the firstb layer of the math functions
-            if (Block == 'n') {
-                Finished = true;
-            } else {
+            char Block[] = GetBlock(ValuedString, "+", "-", " ");
                 int Start = StringRes[0];
                 StringRes[0] = '\t';
                 int NewNum = CalcExpression(Block);
@@ -157,7 +154,8 @@ int CalcEquation(char ValuedString[]) {//Second layer of math funcs, it is for g
         }
     }
     printf("Equation: %s\n", ValuedString);
-}
+
+
 
 
 
@@ -338,7 +336,6 @@ initMap(&map, 32, 32, Ent);
 
 
 int DoMath(int BaseVal, char ValuedString[]) {//First layer of math funcs, it is for checking if the parenthesis are correct and then sending the string of each alyer of parenthesis to the CalcEquation function. Also turns variables into raw numbers
-    int LowestLayerParenthesis = 0;
     int OpenParenthesis = 0;
     int CloseParenthesis = 0;
     for (int i=0; i < strlen(ValuedString); i++) {//Remove spaces
@@ -350,16 +347,20 @@ int DoMath(int BaseVal, char ValuedString[]) {//First layer of math funcs, it is
         switch (ValuedString[i]) {
             case '(':
                 OpenParenthesis++;
-                if (Valuedstring[i-1] != NULL && ValuedString[i-1] >= 0) {
-                    int CSize = strlen(ValuedString)
-                    memove(&ValuedString[i],ValuedString[i],CSize-i)
+                if (Valuedstring[i-1] != NULL && ValuedString[i-1] - '0' >= 0) {
+                    int Index = i-1;
+                    int CSize = strlen(ValuedString);
+                    memove(&ValuedString[Index+1],ValuedString[i],CSize-Index+1);
+                    ValuedString[Index] = '*'
                 }
                 break; 
             case ')':
                 CloseParenthesis++;
-                if (Valuedstring[i+1] != NULL && ValuedString[i+1] >= 0) {
-                    int CSize = strlen(ValuedString)
-                    memove(&ValuedString[i+1],ValuedString[i],CSize-i+1)
+                if (Valuedstring[i+1] != NULL && ValuedString[i+1]- '0' >= 0) {
+                    int CSize = strlen(ValuedString);
+                    int Index = i+1;
+                    memove(&ValuedString[Index+1],ValuedString[i],CSize-Index+1);
+                    ValuedString[Index] = '*';
                 }
             break;
         }
@@ -367,8 +368,33 @@ int DoMath(int BaseVal, char ValuedString[]) {//First layer of math funcs, it is
     if (OpenParenthesis != CloseParenthesis) {
         ReturnError("Mismatched parenthesis in math expression");
     }
-    //Extreme example so i can design the system around a case like this: Var = 2+(3*4(4(1+1)(9%2*4)))+(9+5)
+    //Extreme example so i can design the system around a case like this: Var = 2+(3*4(4*(1+1)*(9%2*4)))+(9+5)
     while (OpenParenthesis > 0) {
+    int StartPos = -1;
+    int CurLay = 0;
+    for (int i=0; i < strlen(ValuedString); i++) {
+        switch (ValuedString[i]) {
+            case '(':
+                CurLay++;
+                if (CurLay == OpenParenthesis) {
+                    StartPos = i;
+                }
+                break; 
+            case ')':
+                if (StartPos != -1) {
+                    char InsideString[];
+                    for (int G = StartPos + 1; G < i; G++) {
+                        strncat(InsideString,&ValuedSting[G],1);
+                    }
+
+                    int RetVal = CalcEquation(InsideString);
+
+                    //TODO make Whole parenthesis turn into RetVal, and make func repeatable
+
+                }
+            break;
+        }
+    }
 
     }
     return BaseVal;
