@@ -71,7 +71,7 @@ char GetBlock(char ValuedString[], char ValidOp1[], char ValidOp2[],char ValidOp
         //Not Done
 
         for (int i = 0; i < strlen(ValuedString); i++) {
-            if (ValuedString[i] - '0' >= 0  || strcmp(ValuedString[i], ".") == 0) {
+            if (ValuedString[i] - '0' >= 0  || ValuedString[i] = '.') {
                 if (Number1BlockStart == -1) {//This still needs to able to to follow the order of operations
                     Number1BlockStart = i;
                 } else if (Number2BlockEnd == -1 && (strcmp(ValuedString[i+1], "^") == 0 || strcmp(ValuedString[i+1], "_") == 0 || strcmp(ValuedString[i+1], "*") == 0 || strcmp(ValuedString[i+1], "/") == 0 || strcmp(ValuedString[i+1], "-") == 0 || strcmp(ValuedString[i+1], "+") == 0)) {
@@ -372,6 +372,7 @@ int DoMath(int BaseVal, char ValuedString[]) {//First layer of math funcs, it is
     while (OpenParenthesis > 0) {
     int StartPos = -1;
     int CurLay = 0;
+    bool Break = false;
     for (int i=0; i < strlen(ValuedString); i++) {
         switch (ValuedString[i]) {
             case '(':
@@ -388,14 +389,27 @@ int DoMath(int BaseVal, char ValuedString[]) {//First layer of math funcs, it is
                     }
 
                     int RetVal = CalcEquation(InsideString);
+                    for (int G = StartPos + 1; G < i; G++) {
+                        ValuedString[G] = '\t';
+                    }
 
-                    //TODO make Whole parenthesis turn into RetVal, and make func repeatable
+                    char NewNum[];
+                    snprintf(NewNum,sizeof(NewNum),"%f",RetVal);
 
+                    int FLength = strlen(NewNum);
+
+                    int StringLength = strlen(ValuedString);
+
+                    memove(ValuedString+i+FLength,ValuedString+i,StringLength-i+1);
+                    memcpy(ValuedString+i,NewNum,FLength);
+                    Break = true;
                 }
             break;
         }
+        if (Break == true) {
+            break;
+        }
     }
-
     }
     return BaseVal;
 }
