@@ -3,10 +3,10 @@ Math is easy in this language.
 OPERATORS:
 + (Addition, adds two numbers)
 - (Subtraction, subtracts first number by second)
-* (Multiplication, multiplys two numbers)
+* (Multiplication, multiplies two numbers)
 / (Division, Divides first number by second, 1/2 = 0.5)
 ^ (Powers, Raises the first number to the second power(Use this for square roots with things like 5^0.5 for the square root of 5))
-% (Moduloso,  runs the moduloso function on the first number, with the second being its divisor (Runs the same as C processes it))
+% (Modulus,  runs the Modulus function on the first number, with the second being its divisor (Runs the same as C processes it))
 
 SYNTAX:
 VARNAME = (Math)
@@ -41,12 +41,7 @@ The math follows the orders of operations
 
 Spaces in the math are stripped from the equation
 
-Moduloso will error if you put a non integer into it
+Putting a non integer, negative, or 0 anywhere in the divisor or devised in modulus return 0 no matter what
 
-doing POSITIVE_NUMBER % NEGATIVE_NUMBER will return 1 no matter what
 
-doing NEGATIVE_NUMBER % POSITIVE_NUMBER will return -1 no matter what
-
-doing NUMBER % 0 will error
-
-~ This is implemented, but needs testing
+~ This is implemented, but needs testing and the modulus cant detect if a number is a int or not
