@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -53,6 +54,11 @@ inline float CalcExpression(char RecievedString[]) {//Last layer of math funcs, 
             return pow(Num1, Num2);
         break; 
         case '%':
+        if (Num1 <= 0 || Num 2 <= 0) {
+            printf("WARNING; Math equation using % had a negative or 0 in the numbers, this may disrupt your equation as it the result defaulted to 0. %d:", CurLine);
+            return 0;
+        }
+
         return fmod(Num1, Num2);
         break;
         //Square roots arent nessecary as they can be done with the ^ operator
